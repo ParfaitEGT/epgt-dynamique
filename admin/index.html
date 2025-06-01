@@ -1,10 +1,33 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <title>Admin | Netlify CMS</title>
+    <title>Admin | Service EPGT</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   </head>
   <body>
+    <!-- Contenu généré automatiquement par Netlify CMS -->
     <script src="https://unpkg.com/netlify-cms@^2.0.0/dist/netlify-cms.js"></script>
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <script>
+      if (window.netlifyIdentity) {
+        window.netlifyIdentity.on("init", (user) => {
+          if (!user) {
+            window.netlifyIdentity.on("login", () => {
+              document.location.href = "/admin/";
+            });
+          }
+        });
+
+        // Gestion automatique du lien d'invitation avec token
+        const url = new URL(window.location.href);
+        const inviteToken = url.hash.match(/invite_token=([^&]+)/);
+        if (inviteToken && inviteToken[1]) {
+          window.netlifyIdentity.acceptInvite({ invite_token: inviteToken[1] })
+            .then(() => window.netlifyIdentity.open())
+            .catch((err) => console.error("Erreur d’invitation :", err));
+        }
+      }
+    </script>
   </body>
 </html>
