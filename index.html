@@ -25,5 +25,11 @@
   <footer>
     <p>© 2025 - Service EPGT | Développé par Parfait Esaie</p>
   </footer>
+    <script>
+    if (window.location.hash.startsWith('#invite_token=')) {
+      window.location.href = '/admin/' + window.location.hash;
+    }
+  </script>
+
 </body>
 </html>
