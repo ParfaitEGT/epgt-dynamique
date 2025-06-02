@@ -4,6 +4,8 @@ backend:
   repo: ParfaitEGT/epgt-dynamique
   site_domain: epgt-dynamique.netlify.app
 
+locale: 'fr'  # 👈 Langue de l'interface admin définie ici
+
 site_url: https://epgt-dynamique.netlify.app
 local_backend: true
 
