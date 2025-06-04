@@ -1,6 +1,7 @@
 backend:
   name: git-gateway
   branch: main
+  locale: 'fr'
   repo: ParfaitEGT/epgt-dynamique
   site_domain: epgt-dynamique.netlify.app
 
