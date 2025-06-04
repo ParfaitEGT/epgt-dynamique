@@ -18,7 +18,8 @@
 
   <main>
     <section id="articles">
-      <!-- Les articles seront insérés ici dynamiquement -->
+       <h2>Nos derniers articles</h2>
+  <div id="article-list" class="articles-container"></div>
     </section>
   </main>
 
@@ -30,6 +31,43 @@
       window.location.href = '/admin/' + window.location.hash;
     }
   </script>
+  
+<script>
+  fetch('/articles')
+    .then(res => res.text())
+    .then(html => {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const links = [...doc.querySelectorAll('a')].filter(link => link.href.endsWith('.md'));
+
+      const articleList = document.getElementById('article-list');
+
+      links.forEach(link => {
+        const filename = link.href.split('/').pop().replace('.md', '');
+        fetch(`/articles/${filename}.md`)
+          .then(res => res.text())
+          .then(md => {
+            const titleMatch = md.match(/title:\s*(.+)/);
+            const dateMatch = md.match(/date:\s*(.+)/);
+            const bodyMatch = md.match(/\n\n([\s\S]*)/);
+
+            const title = titleMatch ? titleMatch[1] : 'Sans titre';
+            const date = dateMatch ? new Date(dateMatch[1]).toLocaleDateString() : '';
+            const excerpt = bodyMatch ? bodyMatch[1].substring(0, 100) + '...' : '';
+
+            const articleEl = document.createElement('div');
+            articleEl.className = 'article-card';
+            articleEl.innerHTML = `
+              <h3>${title}</h3>
+              <p><em>${date}</em></p>
+              <p>${excerpt}</p>
+              <a href="articles/${filename}.md" target="_blank">Lire plus</a>
+            `;
+            articleList.appendChild(articleEl);
+          });
+      });
+    });
+</script>
 
 </body>
 </html>
