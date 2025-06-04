@@ -1,12 +1,13 @@
 backend:
   name: git-gateway
   branch: main
-  locale: 'fr'
   repo: ParfaitEGT/epgt-dynamique
   site_domain: epgt-dynamique.netlify.app
 
 site_url: https://epgt-dynamique.netlify.app
 local_backend: true
+
+locale: 'fr'  # <-- Active l'interface en français
 
 media_folder: "images"
 public_folder: "/images"
