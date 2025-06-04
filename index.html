@@ -1,93 +1,102 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<link rel="icon" href="favicon.ico" type="image/x-icon">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Service EPGT</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header>
-	<h1 id="titre-accueil"></h1>
-<h2 id="sous-titre-accueil"></h2>
-<p id="texte-presentation"></p>
-<a id="bouton-accueil" href="#services"></a>
-     <!-- <a href="/admin/">Admin</a> -->
-    </nav>
+    <h1 id="titre-accueil"></h1>
+    <h2 id="sous-titre-accueil"></h2>
+    <p id="texte-presentation"></p>
+    <a id="bouton-accueil" href="#services"></a>
   </header>
 
   <main>
     <section id="articles">
-       <h2>Nos derniers articles</h2>
-  <div id="article-list" class="articles-container"></div>
+      <h2>Nos derniers articles</h2>
+      <div id="article-list" class="articles-container"></div>
     </section>
   </main>
 
   <footer>
     <p>© 2025 - Service EPGT | Développé par Parfait Esaie</p>
   </footer>
-    <script>
+
+  <!-- Redirection de l'invitation admin -->
+  <script>
     if (window.location.hash.startsWith('#invite_token=')) {
       window.location.href = '/admin/' + window.location.hash;
     }
   </script>
-  
-<script>
-  fetch('/articles')
-    .then(res => res.text())
-    .then(html => {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
-      const links = [...doc.querySelectorAll('a')].filter(link => link.href.endsWith('.md'));
 
-      const articleList = document.getElementById('article-list');
+  <!-- Chargement dynamique du contenu accueil.md -->
+  <script>
+    fetch('content/accueil.md')
+      .then(response => response.text())
+      .then(data => {
+        const frontmatter = data.match(/---([\s\S]*?)---/);
+        if (!frontmatter) return;
+        const parsed = Object.fromEntries(
+          frontmatter[1].trim().split('\n').map(line => {
+            const [key, ...rest] = line.split(':');
+            return [key.trim(), rest.join(':').trim()];
+          })
+        );
 
-      links.forEach(link => {
-        const filename = link.href.split('/').pop().replace('.md', '');
-        fetch(`/articles/${filename}.md`)
-          .then(res => res.text())
-          .then(md => {
-            const titleMatch = md.match(/title:\s*(.+)/);
-            const dateMatch = md.match(/date:\s*(.+)/);
-            const bodyMatch = md.match(/\n\n([\s\S]*)/);
-
-            const title = titleMatch ? titleMatch[1] : 'Sans titre';
-            const date = dateMatch ? new Date(dateMatch[1]).toLocaleDateString() : '';
-            const excerpt = bodyMatch ? bodyMatch[1].substring(0, 100) + '...' : '';
-
-            const articleEl = document.createElement('div');
-            articleEl.className = 'article-card';
-            articleEl.innerHTML = `
-              <h3>${title}</h3>
-              <p><em>${date}</em></p>
-              <p>${excerpt}</p>
-              <a href="articles/${filename}.md" target="_blank">Lire plus</a>
-            `;
-            articleList.appendChild(articleEl);
-          });
+        document.getElementById('titre-accueil').textContent = parsed.titre || '';
+        document.getElementById('sous-titre-accueil').textContent = parsed.sous_titre || '';
+        document.getElementById('texte-presentation').textContent = parsed.presentation || '';
+        document.getElementById('bouton-accueil').textContent = parsed.texte_bouton || '';
       });
-    });
-</script>
-<script>
-  fetch('content/accueil.md')
-    .then(response => response.text())
-    .then(data => {
-      const frontmatter = data.match(/---([\s\S]*?)---/)[1];
-      const parsed = Object.fromEntries(
-        frontmatter.trim().split('\n').map(line => {
-          const [key, ...rest] = line.split(':');
-          return [key.trim(), rest.join(':').trim()];
-        })
-      );
+  </script>
 
-      document.getElementById('titre-accueil').textContent = parsed.titre;
-      document.getElementById('sous-titre-accueil').textContent = parsed.sous_titre;
-      document.getElementById('texte-presentation').textContent = parsed.presentation;
-      document.getElementById('bouton-accueil').textContent = parsed.texte_bouton;
-    });
-</script>
+  <!-- Librairie Markdown -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
+  <!-- Chargement dynamique des articles -->
+  <script>
+    async function fetchArticles() {
+      const container = document.getElementById('article-list');
+      try {
+        const response = await fetch('/articles/');
+        const html = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const links = Array.from(doc.querySelectorAll('a'))
+          .map(a => a.getAttribute('href'))
+          .filter(link => link.endsWith('.md'));
+
+        for (const file of links) {
+          const res = await fetch('/articles/' + file);
+          const md = await res.text();
+
+          const titleMatch = md.match(/title:\s*(.*)/i);
+          const dateMatch = md.match(/date:\s*(.*)/i);
+          const contentMatch = md.split('---').pop(); // Markdown après frontmatter
+
+          const title = titleMatch ? titleMatch[1].trim() : 'Sans titre';
+          const date = dateMatch ? new Date(dateMatch[1]).toLocaleDateString() : '';
+          const html = marked.parse(contentMatch || '');
+
+          const articleEl = document.createElement('article');
+          articleEl.className = 'article-card';
+          articleEl.innerHTML = `
+            <h3>${title}</h3>
+            <p><em>${date}</em></p>
+            <div>${html}</div>
+          `;
+          container.appendChild(articleEl);
+        }
+      } catch (err) {
+        console.error('Erreur de chargement des articles :', err);
+      }
+    }
+
+    fetchArticles();
+  </script>
 </body>
 </html>
-
