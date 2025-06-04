@@ -22,3 +22,14 @@ collections:
       - { label: "Titre", name: "title", widget: "string" }
       - { label: "Date", name: "date", widget: "datetime" }
       - { label: "Contenu", name: "body", widget: "markdown" }
+	    - name: "accueil"
+    label: "Page d'accueil"
+    files:
+      - label: "Contenu d'accueil"
+        name: "contenu_accueil"
+        file: "content/accueil.md"
+        fields:
+          - { label: "Titre principal", name: "titre", widget: "string" }
+          - { label: "Sous-titre", name: "sous_titre", widget: "string" }
+          - { label: "Texte de présentation", name: "presentation", widget: "text" }
+          - { label: "Texte du bouton", name: "texte_bouton", widget: "string" }

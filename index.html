@@ -9,9 +9,10 @@
 </head>
 <body>
   <header>
-    <h1>Bienvenue sur le site dynamique de Service EPGT</h1>
-    <nav>
-      <a href="/">Accueil</a> |
+	<h1 id="titre-accueil"></h1>
+<h2 id="sous-titre-accueil"></h2>
+<p id="texte-presentation"></p>
+<a id="bouton-accueil" href="#services"></a>|
      <!-- <a href="/admin/">Admin</a> -->
     </nav>
   </header>
@@ -66,6 +67,24 @@
             articleList.appendChild(articleEl);
           });
       });
+    });
+</script>
+<script>
+  fetch('content/accueil.md')
+    .then(response => response.text())
+    .then(data => {
+      const frontmatter = data.match(/---([\s\S]*?)---/)[1];
+      const parsed = Object.fromEntries(
+        frontmatter.trim().split('\n').map(line => {
+          const [key, ...rest] = line.split(':');
+          return [key.trim(), rest.join(':').trim()];
+        })
+      );
+
+      document.getElementById('titre-accueil').textContent = parsed.titre;
+      document.getElementById('sous-titre-accueil').textContent = parsed.sous_titre;
+      document.getElementById('texte-presentation').textContent = parsed.presentation;
+      document.getElementById('bouton-accueil').textContent = parsed.texte_bouton;
     });
 </script>
 
